@@ -1,11 +1,16 @@
 import React from 'react';
-import Card from "./views/Card";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Payment from "./views/Payment";
+import Completion from "./views/Completion";
 
 const App = () => {
     return (
-        <div>
-            <Card />
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Payment />} />
+                <Route path="/completion" element={<Completion />} />
+            </Routes>
+        </BrowserRouter>
     );
 };
 
