@@ -1,6 +1,6 @@
-import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
+import {CardElement, CardNumberElement, PaymentElement, useElements, useStripe} from "@stripe/react-stripe-js"
 import axios from "axios"
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 
 
 const CARD_OPTIONS = {
@@ -19,7 +19,10 @@ const CARD_OPTIONS = {
         invalid: {
             iconColor: "#ffc7ee",
             color: "#ffc7ee"
-        }
+        },
+        confirmCardSetup: ('{SETUP_INTENT_CLIENT_SECRET}', {
+            payment_method: '{PAYMENT_METHOD_ID}',
+        })
     }
 }
 
@@ -28,14 +31,25 @@ export default function Checkout() {
     const stripe = useStripe()
     const elements = useElements()
 
+    const clientInstance = stripe.elements({
+        clientSecret: 'CLIENT_SECRET',
+    });
+
+    const options = {
+        // passing the client secret obtained in step 3
+        clientSecret: clientInstance,
+        // Fully customizable with appearance API.
+        appearance: {/*...*/},
+        elements: []
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         const {error, paymentMethod} = await stripe.createPaymentMethod({
             type: "card",
-            card: elements.getElement(CardElement)
+            card: elements.getElement(PaymentElement)
         })
-
 
         if(!error) {
             try {
@@ -58,13 +72,32 @@ export default function Checkout() {
         }
     }
 
+    // const geClientSecret = async () => {
+    //     const {error, paymentMethod} = await stripe.createPaymentMethod({
+    //         type: "card",
+    //         card: elements.getElement(CardElement)
+    //     })
+    //     try {
+    //         const {id} = paymentMethod
+    //         const response = await axios.get("/secret", {params: {id}})
+    //         console.log(response)
+    //         return response
+    //     } catch (e) {
+    //         //
+    //     }
+    // }
+    //
+    // useEffect(() => {
+    //     geClientSecret().then(r => console.log(323222))
+    // }, [])
+
     return (
         <>
             {!success ?
                 <form onSubmit={handleSubmit}>
                     <fieldset className="FormGroup">
                         <div className="FormRow">
-                            <CardElement options={CARD_OPTIONS}/>
+                           <PaymentElement options={options} />
                         </div>
                     </fieldset>
                     <button>Pay</button>
