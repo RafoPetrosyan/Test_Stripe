@@ -1,6 +1,13 @@
-import {CardElement, CardNumberElement, PaymentElement, useElements, useStripe} from "@stripe/react-stripe-js"
+import React, {useState} from 'react'
 import axios from "axios"
-import React, {useEffect, useState} from 'react'
+import {
+    CardCvcElement,
+    CardElement, CardExpiryElement,
+    CardNumberElement, IdealBankElement,
+    PaymentElement,
+    useElements,
+    useStripe
+} from "@stripe/react-stripe-js"
 
 
 const CARD_OPTIONS = {
@@ -31,25 +38,14 @@ export default function Checkout() {
     const stripe = useStripe()
     const elements = useElements()
 
-    const clientInstance = stripe.elements({
-        clientSecret: 'CLIENT_SECRET',
-    });
-
-    const options = {
-        // passing the client secret obtained in step 3
-        clientSecret: clientInstance,
-        // Fully customizable with appearance API.
-        appearance: {/*...*/},
-        elements: []
-    };
-
-
     const handleSubmit = async (e) => {
+        console.log(e)
         e.preventDefault()
         const {error, paymentMethod} = await stripe.createPaymentMethod({
             type: "card",
-            card: elements.getElement(PaymentElement)
+            card: elements.getElement(CardElement)
         })
+
 
         if(!error) {
             try {
@@ -71,33 +67,16 @@ export default function Checkout() {
             console.log(error.message)
         }
     }
-
-    // const geClientSecret = async () => {
-    //     const {error, paymentMethod} = await stripe.createPaymentMethod({
-    //         type: "card",
-    //         card: elements.getElement(CardElement)
-    //     })
-    //     try {
-    //         const {id} = paymentMethod
-    //         const response = await axios.get("/secret", {params: {id}})
-    //         console.log(response)
-    //         return response
-    //     } catch (e) {
-    //         //
-    //     }
-    // }
-    //
-    // useEffect(() => {
-    //     geClientSecret().then(r => console.log(323222))
-    // }, [])
-
     return (
         <>
             {!success ?
                 <form onSubmit={handleSubmit}>
                     <fieldset className="FormGroup">
                         <div className="FormRow">
-                           <PaymentElement options={options} />
+                           {/*<CardElement options={CARD_OPTIONS} />*/}
+                            <CardNumberElement options={{showIcon: true}} />
+                            <CardCvcElement />
+                            <CardExpiryElement />
                         </div>
                     </fieldset>
                     <button>Pay</button>
